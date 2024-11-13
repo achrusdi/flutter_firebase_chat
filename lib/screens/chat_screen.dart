@@ -6,13 +6,18 @@ import 'package:e_isocomm/widgets/textfield_wg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   final String receiverEmail;
   final String receiverId;
 
-  ChatScreen(
+  const ChatScreen(
       {super.key, required this.receiverEmail, required this.receiverId});
 
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
   // controller
   final TextEditingController _messageController = TextEditingController();
 
@@ -20,10 +25,44 @@ class ChatScreen extends StatelessWidget {
   final ChatService _chatService = ChatService();
   final AuthService _authService = AuthService();
 
+  // text field focus
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      if (_focusNode.hasFocus) {
+        Future.delayed(
+          const Duration(microseconds: 500),
+          () => scrollDown(),
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    _messageController.dispose();
+    super.dispose();
+  }
+
+  final ScrollController _scrollController = ScrollController();
+
+  void scrollDown() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(seconds: 1),
+      curve: Curves.fastOutSlowIn,
+    );
+  }
+
   // send message
   void sendMessage() async {
     if (_messageController.text.isNotEmpty) {
-      await _chatService.sendMessage(receiverId, _messageController.text);
+      await _chatService.sendMessage(
+          widget.receiverId, _messageController.text);
 
       _messageController.clear();
     }
@@ -33,7 +72,7 @@ class ChatScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Chat with $receiverEmail'),
+        title: Text('Chat with ${widget.receiverEmail}'),
         backgroundColor: Colors.transparent,
         elevation: 0,
         foregroundColor: Colors.grey,
@@ -56,7 +95,7 @@ class ChatScreen extends StatelessWidget {
     String senderId = _authService.getCurrentUser()!.uid;
 
     return StreamBuilder(
-        stream: _chatService.getMessages(senderId, receiverId),
+        stream: _chatService.getMessages(senderId, widget.receiverId),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
@@ -67,6 +106,7 @@ class ChatScreen extends StatelessWidget {
           }
 
           return ListView(
+            controller: _scrollController,
             children: snapshot.data!.docs
                 .map((doc) => _buildMessageListItem(doc))
                 .toList(),
@@ -104,6 +144,7 @@ class ChatScreen extends StatelessWidget {
           controller: _messageController,
           obscureText: false,
           hintText: 'Type your message...',
+          focusNode: _focusNode,
         )),
         Container(
           decoration: const BoxDecoration(
