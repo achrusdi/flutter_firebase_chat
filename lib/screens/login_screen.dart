@@ -18,7 +18,7 @@ class LoginPage extends StatelessWidget {
 
     try {
       await authService.signInWithEmailAndPassword(
-          _emailController.text, _passwordController.text);
+          context, _emailController.text, _passwordController.text);
     } catch (e) {
       showDialog(
           context: context,

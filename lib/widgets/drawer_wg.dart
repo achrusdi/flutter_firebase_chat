@@ -7,16 +7,12 @@ class DrawerWg extends StatelessWidget {
   const DrawerWg({super.key});
 
   void attemptLogout(BuildContext context) async {
-    final _authService = AuthService();
-    bool shouldSignOut = await _authService.confirmSignOut(context);
-    print(shouldSignOut);
+    final authService = AuthService();
+    bool shouldSignOut = await authService.confirmSignOut(context);
 
     if (shouldSignOut) {
-      _authService.signOut();
-      // Navigator.of(context).pushReplacementNamed('/login'); // Arahkan ke login
+      authService.signOut(context);
     }
-
-    // _authService.signOut();
   }
 
   @override
@@ -46,21 +42,9 @@ class DrawerWg extends StatelessWidget {
                   onTap: () {
                     Navigator.pushAndRemoveUntil(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const HomeScreen()),
+                      MaterialPageRoute(builder: (context) => HomeScreen()),
                       (Route<dynamic> route) => false,
                     );
-                    // Navigator.pushReplacement(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => const HomeScreen()));
-
-                    // Navigator.pop(context);
-
-                    // Navigator.push(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //         builder: (context) => const HomeScreen()));
                   },
                 ),
               ),

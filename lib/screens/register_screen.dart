@@ -15,7 +15,7 @@ class RegisterPage extends StatelessWidget {
   RegisterPage({super.key, required this.toggleScreens});
 
   void attemptRegister(BuildContext context) async {
-    final _authService = AuthService();
+    final authService = AuthService();
 
     if (_passwordController.text != _repeatPasswordController.text) {
       showDialog(
@@ -24,8 +24,8 @@ class RegisterPage extends StatelessWidget {
               const AlertDialog(content: Text("Passwords don't match")));
     } else {
       try {
-        await _authService.signUpWithEmailAndPassword(
-            _emailController.text, _passwordController.text);
+        await authService.signUpWithEmailAndPassword(
+            context, _emailController.text, _passwordController.text);
       } catch (e) {
         showDialog(
             context: context,
